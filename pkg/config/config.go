@@ -13,14 +13,30 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package main
+package config
 
 import (
-	"github.com/glacion/spotify-utils/cmd"
+	"strings"
+
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-func main() {
-	err := cmd.Command.Execute()
-	log.Fatal().Err(err)
+func Configure(cmd *cobra.Command, configPath string) error {
+	viper.SetConfigFile(configPath)
+
+	// Environment variables can't have dashes or dots
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
+	viper.AutomaticEnv()
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Debug().
+			Err(err).
+			Msg("config file could not be read")
+	}
+
+	viper.BindPFlags(cmd.Flags())
+	return nil
 }
