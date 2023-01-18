@@ -30,7 +30,10 @@ func Init(path string) error {
 	log.Debug().Msg("reading cache")
 	c = cache{Path: path}
 
-	err := ensureFile(path)
+	_, err := os.Stat(path)
+	if err != nil {
+		err = ensureFile(path)
+	}
 	if err != nil {
 		return err
 	}
